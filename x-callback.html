@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Ulysses X-Callback-URL Support</title>
+	<link type="text/css" rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<div id='wrapper'>
+
+<h1 id="ulyssesx-callback-urlsupport">Ulysses X-Callback-URL Support</h1>
+
+<p>Ulysses supports <a href="http://x-callback-url.com/">x-callback-urls</a>, allowing other apps to trigger certain actions in Ulysses such as opening existing sheets or creating new sheets, groups or attachments.</p>
+
+<p><em>(Documentation for Ulysses 2.8 and later)</em></p>
+
+<h2 id="theurlscheme">The URL Scheme</h2>
+
+<p>The used scheme is <code>ulysses://</code>. Every action can be called through the x-callback-url API using the following format:</p>
+
+<pre><code>ulysses://x-callback-url/[action]?[x-callback parameters]&amp;[parameters]
+</code></pre>
+
+<p>For more information regarding the URL format, see the <a href="http://x-callback-url.com/specifications/">official specification</a>.</p>
+
+<h2 id="availableactions">Available Actions</h2>
+
+<p>In the following, all available actions are detailed. Please note that for reasons of clarity, the examples are not yet URL encoded. For instance, all whitespace must be replaced with <code>%20</code>.</p>
+
+<ul>
+<li><a href="#new-sheet">new-sheet</a></li>
+<li><a href="#new-group">new-group</a></li>
+<li><a href="#insert">insert</a></li>
+<li><a href="#attach-note">attach-note</a></li>
+<li><a href="#update-note">update-note</a></li>
+<li><a href="#remove-note">remove-note</a></li>
+<li><a href="#attach-image">attach-image</a></li>
+<li><a href="#attach-keywords">attach-keywords</a></li>
+<li><a href="#remove-keywords">remove-keywords</a></li>
+<li><a href="#set-group-title">set-group-title</a></li>
+<li><a href="#set-sheet-title">set-sheet-title</a></li>
+<li><a href="#move">move</a></li>
+<li><a href="#copy">copy</a></li>
+<li><a href="#trash">trash</a></li>
+<li><a href="#get-item">get-item</a></li>
+<li><a href="#get-root-items">get-root-items</a></li>
+<li><a href="#read-sheet">read-sheet</a></li>
+<li><a href="#get-quick-look-url">get-quick-look-url</a></li>
+<li><a href="#open">open</a></li>
+<li><a href="#open-any">open-all</a>, <a href="#open-any">open-recent</a>, <a href="#open-any">open-favorites</a></li>
+</ul>
+
+<p><a id="new-sheet"></a></p>
+
+<h3 id="new-sheet">new-sheet</h3>
+
+<p>Creates a new sheet.</p>
+
+<p><span class="availability-version"><em>Available on iOS since Ulysses 2.6 (<a href="#api-versions">API version 1</a>), on Mac since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>text</code><br/>
+The contents that should be inserted to the new sheet. Must be URL-encoded. Contents are imported as Markdown by default.</li>
+<li><code>group</code><br/>
+ Optional. Specifies the group the new sheet should be inserted to. This argument can be set to one of the following values:
+
+<ol>
+<li>A group name (e.g. <code>My Group</code>) that will match the first group having the same name, regardless of its position in the group hierarchy.</li>
+<li>A path to a particular target group (e.g. <code>/My Group/My Subgroup</code>). Any path must begin with a slash. (<a href="#paths">More…</a>)</li>
+<li>A unique <a href="#identifier">identifier</a> of the target group. (<a href="#identifier">More…</a>)</li>
+<li>If no value is given, the sheet is created inside the Inbox.</li>
+</ol></li>
+<li><code>format</code><br/>
+ Optional. Specifies the format of the imported text: <code>markdown</code>, <code>text</code>, <code>html</code>. Defaults to Markdown.</li>
+<li><code>index</code><br/>
+ Optional. The position of the new sheet in its parent group. Use <code>0</code> to make it the first sheet.<br/>
+ <span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/new-sheet?text=My new sheet&amp;index=2
+</code></pre>
+
+<p><a id="new-group"></a></p>
+
+<h3 id="new-group">new-group</h3>
+
+<p>Creates a new group.</p>
+
+<p><span class="availability-version"><em>Available on iOS since Ulysses 2.6 (<a href="#api-versions">API version 1</a>), on Mac since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>name</code><br/>
+The name of the group to be created.</li>
+<li><code>parent</code><br/>
+ Optional. Specifies the parent group the new group should be inserted to. This argument can be set to one of the following values:
+
+<ol>
+<li>A group name (e.g. <code>My Group</code>) that will match the first group having the same name, regardless of its position in the group hierarchy.</li>
+<li>A path to a particular target group (e.g. <code>/My Group/My Subgroup</code>). Any path must begin with a slash. (<a href="#paths">More…</a>)</li>
+<li>A unique <a href="#identifier">identifier</a> of the target group. (<a href="#identifier">More…</a>)</li>
+<li>If no value is given, the group is created inside the top level group.</li>
+</ol></li>
+<li><code>index</code><br/>
+ Optional. The position of the new group in its parent group. Use <code>0</code> to make it the first group.<br/>
+ <span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/new-group?name=My Group&amp;index=3
+</code></pre>
+
+<p><a id="insert"></a></p>
+
+<h3 id="insert">insert</h3>
+
+<p>Inserts or appends text to a sheet.</p>
+
+<p><span class="availability-version"><em>Available on iOS since Ulysses 2.6 (<a href="#api-versions">API version 1</a>), on Mac since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet the text should be inserted to. (<a href="#identifier">More…</a>)</li>
+<li><code>text</code><br/>
+ The contents that should be inserted to the new sheet. Must be URL-encoded. Contents are imported as Markdown by default.</li>
+<li><code>format</code><br/>
+ Optional. Specifies the format of the imported text: <code>markdown</code>, <code>text</code> or <code>html</code>. Defaults to Markdown.</li>
+<li><code>position</code><br/>
+ Optional. Set <code>begin</code> or <code>end</code> in order to insert text at the beginning of a document. If not given, the text is appended.</li>
+<li><code>newline</code><br/>
+ Optional. Specifies how newlines should be inserted to the text: Set <code>prepend</code> to prepend the inserted text by a newline. Set <code>append</code> to append the inserted text with a newline and <code>enclose</code> to enclose the entire text with newlines.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/insert?id=H8zLAmc1I0njH-0Ql-3YGQ&amp;text=Inserted text
+</code></pre>
+
+<p><a id="attach-note"></a></p>
+
+<h3 id="attach-note">attach-note</h3>
+
+<p>Creates a new note attachment on a sheet.</p>
+
+<p><span class="availability-version"><em>Available on iOS since Ulysses 2.6 (<a href="#api-versions">API version 1</a>), on Mac since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet the note should be attached to. (<a href="#identifier">More…</a>)</li>
+<li><code>text</code><br/>
+ The contents that should be attached as note to the new sheet. Must be URL-encoded. Contents are imported as Markdown by default.</li>
+<li><code>format</code><br/>
+ Optional. Specifies the format of the imported text: <code>markdown</code>, <code>text</code> or <code>html</code>. Defaults to Markdown.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/attach-note?id=H8zLAmc1I0njH-0Ql-3YGQ&amp;text=My new note
+</code></pre>
+
+<p><a id="update-note"></a></p>
+
+<h3 id="update-note">update-note</h3>
+
+<p>Changes an existing note attachment on a sheet. Requires <a href="#authorization">authorization</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet where a note should be changed. (<a href="#identifier">More…</a>)</li>
+<li><code>index</code><br/>
+ The position of the note to change. Use <code>0</code> for the first note, <code>1</code> for the second note, and so on.</li>
+<li><code>text</code><br/>
+ The new contents of the note. Must be URL-encoded. Contents are imported as Markdown by default.</li>
+<li><code>format</code><br/>
+ Optional. Specifies the format of the imported text: <code>markdown</code>, <code>text</code> or <code>html</code>. Defaults to Markdown.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/update-note?id=H8zLAmc1I0njH-0Ql-3YGQ&amp;index=2&amp;text=New note text&amp;access-token=67be78e8b61e946dbc44fd5135ec99bf
+</code></pre>
+
+<p><a id="remove-note"></a></p>
+
+<h3 id="remove-note">remove-note</h3>
+
+<p>Removes a note attachment from a sheet. Requires <a href="#authorization">authorization</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet from which a note should be removed. (<a href="#identifier">More…</a>)</li>
+<li><code>index</code><br/>
+ The position of the note to remove. Use <code>0</code> for the first note, <code>1</code> for the second note, and so on.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/remove-note?id=H8zLAmc1I0njH-0Ql-3YGQ&amp;index=1&amp;access-token=67be78e8b61e946dbc44fd5135ec99bf
+</code></pre>
+
+<p><a id="attach-image"></a></p>
+
+<h3 id="attach-image">attach-image</h3>
+
+<p>Creates a new image attachment on a sheet.</p>
+
+<p><span class="availability-version"><em>Available on iOS since Ulysses 2.6 (<a href="#api-versions">API version 1</a>), on Mac since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet the image should be attached to. (<a href="#identifier">More…</a>)</li>
+<li><code>image</code><br/>
+ The image data that should be used. The data must use <a href="https://wikipedia.org/wiki/Base64">base64 encoding</a>. Make sure that the base64-encoded data is also URL encoded.</li>
+<li><code>format</code><br/>
+ The format of the provided image (use an image path extension, like <code>png</code>, <code>pdf</code>, <code>jpg</code>, <code>raw</code>, <code>gif</code>).</li>
+<li><code>filename</code><br/>
+ A filename the image format should be detected from. Either the argument <code>format</code> or <code>filename</code> must be provided.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/attach-image?id=H8zLAmc1I0njH-0Ql-3YGQ&amp;image=iVBORw0KGgoAAAANSUhEUg…
+</code></pre>
+
+<p><a id="attach-keywords"></a></p>
+
+<h3 id="attach-keywords">attach-keywords</h3>
+
+<p>Adds one or more keywords to a sheet.</p>
+
+<p><span class="availability-version"><em>Available on iOS since Ulysses 2.6 (<a href="#api-versions">API version 1</a>), on Mac since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet the keywords should be attached to. (<a href="#identifier">More…</a>)</li>
+<li><code>keywords</code><br/>
+ A comma separated list of keywords that should be attached to the sheet.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/attach-keywords?id=H8zLAmc1I0njH-0Ql-3YGQ&amp;keywords=Draft,Important
+</code></pre>
+
+<p><a id="remove-keywords"></a></p>
+
+<h3 id="remove-keywords">remove-keywords</h3>
+
+<p>Removes one or more keywords from a sheet. Requires <a href="#authorization">authorization</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet the keywords should be removed from. (<a href="#identifier">More…</a>)</li>
+<li><code>keywords</code><br/>
+ A comma separated list of keywords that should be removed from the sheet.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/remove-keywords?id=H8zLAmc1I0njH-0Ql-3YGQ&amp;keywords=Draft,Important&amp;access-token=67be78e8b61e946dbc44fd5135ec99bf
+</code></pre>
+
+<p><a id="set-group-title"></a></p>
+
+<h3 id="set-group-title">set-group-title</h3>
+
+<p>Changes the title of a group. Requires <a href="#authorization">authorization</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>group</code><br/>
+ The group for which the title should be changed. This argument can be set to one of the following values:
+
+<ol>
+<li>A group name (e.g. <code>My Group</code>) that will match the first group having the same name, regardless of its position in the group hierarchy.</li>
+<li>A path to a particular target group (e.g. <code>/My Group/My Subgroup</code>). Any path must begin with a slash. (<a href="#paths">More…</a>)</li>
+<li>A unique <a href="#identifier">identifier</a> of the target group. (<a href="#identifier">More…</a>)</li>
+</ol></li>
+<li><code>title</code><br/>
+ The new title. Must be URL-encoded.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/set-group-title?group=My Group&amp;title=The new title&amp;access-token=67be78e8b61e946dbc44fd5135ec99bf
+</code></pre>
+
+<p><a id="set-sheet-title"></a></p>
+
+<h3 id="set-sheet-title">set-sheet-title</h3>
+
+<p>Changes the first paragraph of a sheet. Requires <a href="#authorization">authorization</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>sheet</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet for which the title should be changed. (<a href="#identifier">More…</a>)</li>
+<li><code>title</code><br/>
+ The new title. Must be URL-encoded.</li>
+<li><code>type</code><br/>
+ The type of paragraph to use for the title. This argument can be set to one of the following values:
+
+<ol>
+<li><code>heading1</code>, …, <code>heading6</code> to use a heading paragraph.</li>
+<li><code>comment</code> to use a comment paragraph.</li>
+<li><code>filename</code> to use a filename paragraph such as <code>@: My Filename</code>. Only applies to sheets in external folders.</li>
+</ol></li>
+</ul>
+
+<p>If the sheet has a first paragraph with the requested type, the paragraph contents will be changed (a heading replaces any existing heading). Otherwise, a new paragraph with the requested type and contents will be inserted at the beginning of the sheet.</p>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/set-sheet-title?sheet=hZ7IX2jqKbVmPGlYUXkZjQ&amp;title=The new title&amp;type=heading4&amp;access-token=67be78e8b61e946dbc44fd5135ec99bf
+</code></pre>
+
+<p><a id="move"></a></p>
+
+<h3 id="move">move</h3>
+
+<p>Moves an item (sheet or group) to a target group and/or to a new position. Requires <a href="#authorization">authorization</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the item (sheet or group) that should be moved. (<a href="#identifier">More…</a>)</li>
+<li><code>targetGroup</code><br/>
+ Optional if <code>index</code> is set. The group where the item should be moved. This argument can be set to one of the following values:
+
+<ol>
+<li>A group name (e.g. <code>My Group</code>) that will match the first group having the same name, regardless of its position in the group hierarchy.</li>
+<li>A path to a particular group (e.g. <code>/My Group/My Subgroup</code>). Any path must begin with a slash. (<a href="#paths">More…</a>)</li>
+<li>A unique <a href="#identifier">identifier</a> of a sheet or group that should be opened. (<a href="#identifier">More…</a>)<br/>
+ If the parameter is not set, the item will be moved inside of its current parent group.</li>
+</ol></li>
+<li><code>index</code>
+ Optional if <code>targetGroup</code> is set. The position of the item in its target group. Use <code>0</code> to make it the first item.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/move?id=hZ7IX2jqKbVmPGlYUXkZjQ&amp;targetGroup=H8zLAmc1I0njH-0Ql-3YGQ&amp;index=5&amp;access-token=67be78e8b61e946dbc44fd5135ec99bf
+</code></pre>
+
+<p><a id="copy"></a></p>
+
+<h3 id="copy">copy</h3>
+
+<p>Copies an item (sheet or group) to a target group and/or to a new position.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the item (sheet or group) that should be copied. (<a href="#identifier">More…</a>)</li>
+<li><code>targetGroup</code><br/>
+ Optional if <code>index</code> is set. The group where the item should be copied. This argument can be set to one of the following values:
+
+<ol>
+<li>A group name (e.g. <code>My Group</code>) that will match the first group having the same name, regardless of its position in the group hierarchy.</li>
+<li>A path to a particular group (e.g. <code>/My Group/My Subgroup</code>). Any path must begin with a slash. (<a href="#paths">More…</a>)</li>
+<li>A unique <a href="#identifier">identifier</a> of a sheet or group that should be opened. (<a href="#identifier">More…</a>)<br/>
+ If the parameter is not set, the item will be copied inside of its current parent group.</li>
+</ol></li>
+<li><code>index</code><br/>
+ Optional if <code>targetGroup</code> is set. The position of the item in its target group. Use <code>0</code> to make it the first item.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/copy?id=hZ7IX2jqKbVmPGlYUXkZjQ&amp;targetGroup=H8zLAmc1I0njH-0Ql-3YGQ&amp;index=4
+</code></pre>
+
+<p><a id="trash"></a></p>
+
+<h3 id="trash">trash</h3>
+
+<p>Moves an item (sheet or group) to the trash. Requires <a href="#authorization">authorization</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the item (sheet or group) that should be moved to the trash. (<a href="#identifier">More…</a>)</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/trash?id=hZ7IX2jqKbVmPGlYUXkZjQ&amp;access-token=67be78e8b61e946dbc44fd5135ec99bf
+</code></pre>
+
+<p><a id="get-item"></a></p>
+
+<h3 id="get-item">get-item</h3>
+
+<p>Retrieves information about an item (sheet or group). Requires <a href="#authorization">authorization</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the item (sheet or group) for which to retrieve information. (<a href="#identifier">More…</a>)</li>
+<li><code>recursive</code><br/>
+ Optional. Determines whether the result should include all sub-groups of the group. Only relevant if the item is a group. The allowed values are <code>YES</code> and <code>NO</code>. Defaults to <code>YES</code>.</li>
+</ul>
+
+<p><strong>Results:</strong></p>
+
+<p>The <code>x-success</code> callback retrieves an argument <code>item</code>. The value is a URL-encoded <a href="http://www.json.org">JSON</a> object providing information on the requested item. The structure of this value depends on the item type. </p>
+
+<p><strong>Groups:</strong></p>
+
+<p>If the item is a group, then the info object has this format:</p>
+
+<ul>
+<li><code>title</code><br/>
+ The title of the group.</li>
+<li><code>type</code><br/>
+ The type of the item. This can be <code>group</code>, <code>filter</code> or <code>trash</code>.</li>
+<li><code>identifier</code><br/>
+ The <a href="#identifier">identifier</a> of the group.</li>
+<li><code>hasLifetimeIdentifier</code>
+ Whether the identifier stays the same even if the group is moved or renamed. <code>true</code> for items that are stored in the sections &#8220;iCloud&#8221; or &#8220;On My Mac&#8221; / &#8220;On My iPad&#8221;. <code>false</code> for items in external folders or Dropbox.</li>
+<li><code>containers</code><br/>
+ The item descriptions for all child groups of this group. Will be empty if the parameter <code>recursive</code> was set to <code>NO</code>.</li>
+<li><code>sheets</code><br/>
+ The item descriptions for all sheets of this group. Will be empty for filters.</li>
+</ul>
+
+<p><strong>Sheets:</strong></p>
+
+<p>If the item is a sheet, then the object has this format:</p>
+
+<ul>
+<li><code>title</code><br/>
+ The sheet&#8217;s title, limited to a length of 256 characters.</li>
+<li><code>titleType</code><br/>
+ The markup type of the title. Will be set to <code>heading1</code>…<code>heading6</code>, <code>comment</code> if the title is a heading or comment. Will be set to <code>filename</code> on external folders or Dropbox if the title is the sheet&#8217;s filename (e.g. <code>@: My Filname</code>). If no title is given this vlaue is set to <code>null</code>.</li>
+<li><code>type</code><br/>
+ The type of the item (always <code>sheet</code>).</li>
+<li><code>identifier</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet.</li>
+<li><code>hasLifetimeIdentifier</code><br/>
+ Whether the identifier stays the same even if the group is moved or renamed. <code>true</code> for items that are stored in the sections &#8220;iCloud&#8221; or &#8220;On My Mac&#8221; / &#8220;On My iPad&#8221;. <code>false</code> for items in external folders or Dropbox.</li>
+<li><code>changeToken</code><br/>
+ A value that identifies the current verison of the sheet. The change token will have a different value whenever the sheet changes.</li>
+<li><code>modificationDate</code><br/>
+ The timestamp when the sheet was last modified. The timestamp is given as the number of seconds relative to <em>00:00:00 UTC on 1 January 2001</em>.</li>
+<li><code>creationDate</code><br/>
+ The timestamp when the sheet was last created.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/get-item?id=H8zLAmc1I0njH-0Ql-3YGQ&amp;recursive=NO&amp;access-token=67be78e8b61e946dbc44fd5135ec99bf
+</code></pre>
+
+<p><a id="get-root-items"></a></p>
+
+<h3 id="get-root-items">get-root-items</h3>
+
+<p>Retrieves information about the root sections. Can be used to get a full listing of the entire Ulysses library. Requires <a href="#authorization">authorization</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>recursive</code><br/>
+ Optional. Determines whether the result should be a deep listing of the entire Ulysses library. The allowed values are <code>YES</code> and <code>NO</code>. Defaults to <code>YES</code>.</li>
+</ul>
+
+<p><strong>Results:</strong></p>
+
+<p>The <code>x-success</code> callback retrieves an argument <code>items</code>. The value is a URL-encoded <a href="http://www.json.org">JSON</a> array. It contains an <a href="#get-item-results">info object</a> for each section such as „iCloud”, „On My iPad”, and one for each external folder.</p>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/get-root-items?recursive=NO&amp;access-token=67be78e8b61e946dbc44fd5135ec99bf
+</code></pre>
+
+<p><a id="read-sheet"></a></p>
+
+<h3 id="read-sheet">read-sheet</h3>
+
+<p>Retrieves the contents (text, notes, keywords) of a sheet. Requires <a href="#authorization">authorization</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet that should be read. (<a href="#identifier">More…</a>)</li>
+<li><code>text</code><br/>
+ Optional. Determines whether the full text of the sheet should be included in the result. The allowed values are <code>YES</code> and <code>NO</code>. Defaults to <code>NO</code>.</li>
+</ul>
+
+<p><strong>Results:</strong></p>
+
+<p>The <code>x-success</code> callback retrieves an argument <code>sheet</code>. The value is a URL-encoded <a href="http://www.json.org">JSON</a> object. It has the following structure:</p>
+
+<ul>
+<li><code>title</code><br/>
+ The sheet&#8217;s title, limited to a length of 256 characters.</li>
+<li><code>titleType</code><br/>
+ The markup type of the title. Will be set to <code>heading1</code>…<code>heading6</code>, <code>comment</code> if the title is a heading or comment. Will be set to <code>filename</code> on external folders or Dropbox if the title is the sheet&#8217;s filename (e.g. <code>@: My Filname</code>). If no title is given this vlaue is set to <code>null</code>.</li>
+<li><code>type</code><br/>
+ The type of the item (always <code>sheet</code>).</li>
+<li><code>changeToken</code><br/>
+ A value that identifies the current verison of the sheet. The change token will have a different value whenever the sheet changes.</li>
+<li><code>modificationDate</code><br/>
+ The timestamp when the sheet was last modified. The timestamp is given as the number of seconds relative to <em>00:00:00 UTC on 1 January 2001</em>`.</li>
+<li><code>creationDate</code><br/>
+ The timestamp when the sheet was last created.</li>
+<li><code>identifier</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet.</li>
+<li><code>hasLifetimeIdentifier</code><br/>
+ Whether the identifier stays the same even if the group is moved or renamed. <code>true</code> for items that are stored in the sections &#8220;iCloud&#8221; or &#8220;On My Mac&#8221; / &#8220;On My iPad&#8221;. <code>false</code> for items in external folders or Dropbox.</li>
+<li><code>text</code><br/>
+ The sheets content encoded as Markdown. This is only available if the <code>text</code> parameter was set to <code>YES</code>.</li>
+<li><code>keywords</code><br/>
+ The keywords of the sheet as an array of strings.</li>
+<li><code>notes</code><br/>
+ The notes of the sheet as an array of strings. All notes are encoded as Markdown.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/read-sheet?id=rQODhTD-dTrwM69Qrsj9cQ&amp;text=YES&amp;access-token=0215c79c391140aab65c3a15ceb61ee1
+</code></pre>
+
+<p><a id="get-quick-look-url"></a></p>
+
+<h3 id="get-quick-look-url">get-quick-look-url</h3>
+
+<p>Gets the QuickLook URL for a sheet. This is the sheet&#8217;s location on the file system. Only available in Ulysses for Mac.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ The <a href="#identifier">identifier</a> of the sheet for which a QuickLook URL should be generated.</li>
+</ul>
+
+<p><strong>Results:</strong></p>
+
+<p>The <code>x-success</code> callback retrieves an argument <code>url</code>. The value is the sheet&#8217;s URL-encoded file path.</p>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/get-quick-look-url?id=hZ7IX2jqKbVmPGlYUXkZjQ
+</code></pre>
+
+<p><a id="open"></a></p>
+
+<h3 id="open">open</h3>
+
+<p>Opens an item (sheet or group) with a particular <a href="#identifier">identifier</a> in Ulysses.</p>
+
+<p><span class="availability-version"><em>Available on iOS since Ulysses 2.6 (<a href="#api-versions">API version 1</a>), on Mac since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><code>id</code><br/>
+ Specifies the item (sheet or group) that should be opened. This argument can be set to one of the following values:
+
+<ol>
+<li>A group name (e.g. <code>My Group</code>) that will match the first group having the same name, regardless of its position in the group hierarchy.</li>
+<li>A path to a particular group (e.g. <code>/My Group/My Subgroup</code>). Any path must begin with a slash. (<a href="#paths">More…</a>)</li>
+<li>A unique <a href="#identifier">identifier</a> of a sheet or group that should be opened. (<a href="#identifier">More…</a>)</li>
+</ol></li>
+</ul>
+
+<p><strong>Notes:</strong></p>
+
+<p>You can get a URL for opening sheets and groups directly within Ulysses.
+On iOS, just swipe on any sheet or group and select the action &#8220;More&#8221;. Then tap the &#8220;Share…&#8221; action and choose the &#8220;Copy URL&#8221; activity. A URL for opening your sheet or group has been now placed on your pasteboard.
+On the Mac, hold ⌥ while right-clicking an item in the Library, or a sheet in the sheets column. Select „Copy Callback URL” from the menu.</p>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>ulysses://x-callback-url/open?id=hZ7IX2jqKbVmPGlYUXkZjQ
+</code></pre>
+
+<p><a id="open-group"></a></p>
+
+<h3 id="open-allopen-recentopen-favorites">open-all, open-recent, open-favorites</h3>
+
+<p>Opens the special groups “All”, “Last 7 Days” and “Favorites”.</p>
+
+<p><span class="availability-version"><em>Available on iOS since Ulysses 2.6 (<a href="#api-versions">API version 1</a>), on Mac since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><a id="get-version"></a></p>
+
+<h3 id="get-version">get-version</h3>
+
+<p>Retrieves the build number of Ulysses, and the <a href="#api-versions">version of Ulysses&#8217; X-Callback API</a>.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p><strong>Results:</strong></p>
+
+<p>The <code>x-success</code> callback retrieves two arguments:</p>
+
+<ul>
+<li><code>apiVersion</code>: The version of Ulysses&#8217; X-Callback API (e.g. <code>2</code>). Use this to find out which actions (and parameters) are supported.</li>
+<li><code>buildNumber</code>: The build version number of Ulysses itself (e.g. <code>32193</code>).</li>
+</ul>
+
+<p><a id="identifier"></a><a id="identifiers"></a></p>
+
+<h2 id="identifiers">Identifiers</h2>
+
+<p>Several callbacks use so-called <em>identifier</em> arguments to specify the sheet or group an operation should be executed on. Identifiers are 22 characters long and are in a URL-safe encoding. E.g. <code>ulysses://x-callback-url/open?id=DCj45UWKr_g15y2vBPwJdQ</code> will open the item with this identifier.</p>
+
+<p>Identifiers are created internally by Ulysses and allow to reference sheets and groups. If you&#8217;re using iCloud or a local library, an identifier remains the same, even if the item is edited, renamed or moved around. In external folders, the identifier can change if you move or rename an item. You can get the identifier of a sheet or a group on iOS by following these steps:</p>
+
+<ol>
+<li>Open the sheet list or library</li>
+<li>Swipe-left on a sheet or group and tap the „More” button</li>
+<li>Select the „Share” action</li>
+<li>Tap the „Copy Identifier” activity</li>
+</ol>
+
+<p>On the Mac, hold ⌥ while right-clicking an item in the Library, or a sheet in the sheets column. Select „Copy Callback Identifier” from the menu.</p>
+
+<p>Afterwards, the identifier of the sheet or group is copied to the pasteboard. The identifier has a URL-safe encoding that can be directly pasted to your x-callback action.</p>
+
+<p><a id="path"></a> <a id="paths"></a></p>
+
+<h2 id="paths">Paths</h2>
+
+<p>As an alternative to <a href="#identifiers">identifiers</a>, the target group of many actions can be also specified by a path of group names. Usually, a path refers to groups inside the sections „iCloud”, „On My iPad” or „On My iPhone”. However, if a path begins with the name of an external folder (e.g. Dropbox), Ulysses will resolve the path within this folder.</p>
+
+<p>A path must begin with a slash character <code>/</code>. Ulysses will try to match the group names in the path with the original casing first. If the group is not found, Ulysses will fall back to case-insensitive matching.</p>
+
+<p><strong>Example:</strong></p>
+
+<ul>
+<li><code>/Books/Huckleberry Finn</code>
+ Matches a group named „Huckleberry Finn” inside the group „Books”.</li>
+<li><code>/My Dropbox/Reports</code>
+ If a Dropbox folder „My Dropbox” exists, this path will match the folder „Reports” inside of it.</li>
+</ul>
+
+<h2 id="x-callbackparameters">x-callback Parameters</h2>
+
+<p>In addition to action parameters, there are some generic parameters you can provide <strong>optionally</strong> for any action. Many automation apps provide these arguments automatically:</p>
+
+<ul>
+<li><code>x-success</code><br/>
+ URL that should be opened when an action has been successfully completed. If not provided, the user stays in Ulysses. The URL will retrieve at least the following arguments:
+
+<ol>
+<li><code>targetId</code><br/>
+ The ID of the sheet or group that was either created, modified or revealed by the action.</li>
+<li><code>targetURL</code><br/>
+ A URL that can be used to open the sheet or group that has been created , modified or revealed by the action. Depending on the action, the URL may retrieve more arguments containing additional results.</li>
+</ol></li>
+<li><code>x-error</code><br/>
+ URL to be opened if an error occurred. It will retrieve the arguments <code>errorCode</code> and <code>errorMessage</code> providing further details on the error. Errors will mostly occur, if an identifier cannot be resolved. If not provided, the user stays in Ulysses if an error occurred.</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<p>If a new sheet should be created and Ulysses should return to the calling app, use the following URL (line breaks are for legibility):</p>
+
+<pre><code>ulysses://x-callback-url/new-sheet?
+    x-success=sourceapp://x-callback-url/success&amp;
+    group=Lecture Notes
+</code></pre>
+
+<p>On success, Ulysses will call the following URL to return to the calling app:</p>
+
+<pre><code>sourceapp://x-callback-url/success?
+    targetId=H8zLAmc1I0njH-0Ql-3YGQ&amp;
+    targetURL=ulysses://x-callback-url/open?id=H8zLAmc1I0njH-0Ql-3YGQ
+</code></pre>
+
+<p><a id="authorization"></a></p>
+
+<h2 id="authorization">Authorization</h2>
+
+<p>To protect the Ulysses library against access from malicious apps, actions that expose content or destructively change require the calling app to be authorized.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p>Authorizing an app <code>My App</code> consists of these steps:</p>
+
+<ol>
+<li><p><code>My App</code> calls Ulysses&#8217; <code>authorize</code> action. The action has a required argument <code>appname</code>, which must be set to the name of the calling app. For example: </p>
+
+<pre><code>ulysses://x-callback-url/authorize?appname=My App&amp;x-success=myapp://x-callback-url/auth-success
+</code></pre></li>
+<li><p>Ulysses asks the user to allow or deny <code>My App</code> access to the Ulysses library.</p></li>
+<li><p>If the user allows access, Ulysses calls the <code>x-success</code> callback (in the example <code>myapp://x-callback-url/auth-success</code>) and sets the parameter <code>access-token</code>.
+ If the user denies access, Ulysses calls the provided <code>x-error</code> callback.</p></li>
+<li><p><code>My App</code> stores the access token, and passes it to Ulysses when calling actions that require authorization. For example: </p>
+
+<pre><code>ulysses://x-callback-url/get-item?id=H8zLAmc1I0njH-0Ql-3YGQ&amp;recursive=NO&amp;access-token=464b33b8ea994f2784dbedca60de0ebf
+</code></pre></li>
+</ol>
+
+<p><a id="silent-mode"></a></p>
+
+<h2 id="silentmode">Silent Mode</h2>
+
+<p>By default, when an item is affected by an action (e.g. moved), Ulysses reveals it to the user. To prevent this, add the parameter <code>silent-mode=YES</code> to the URL.</p>
+
+<p><span class="availability-version"><em>Available since Ulysses 2.8 (<a href="#api-versions">API version 2</a>).</em></span></p>
+
+<p>On MacOS, an app can also prevent Ulysses switching to foreground. This can be done by setting the option <code>NSWorkspaceLaunchWithoutActivation</code> when opening the URL using <code>NSWorkspace</code>.</p>
+
+<p><a id="api-versions"></a></p>
+
+<h2 id="apiversions">API Versions</h2>
+
+<p>Every Ulysses version from 2.8 onwards has an API version number, which can be retrieved using the <a href="#get-version">get-version</a> action. The version indicates which actions and parameters can be called.</p>
+
+<p>If you would like to distribute an app that communicates with the X-Callback API of Ulysses, please let it call <a href="#get-version">get-version</a> first, and ensure that it only calls actions that are supported in the Ulysses version installed on the user&#8217;s system.</p>
+
+<p>The table below shows the API versions supported by different versions of Ulysses:</p>
+
+<table>
+<colgroup>
+<col/>
+<col/>
+</colgroup>
+
+<thead>
+<tr>
+	<th>API Version</th>
+	<th>Ulysses Version</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+	<td>1</td>
+	<td>2.6, iOS only.</td>
+</tr>
+<tr>
+	<td>2</td>
+	<td>2.8</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</body>
+</html>
